@@ -30,7 +30,7 @@ function DelModal2({ productId, onDelete, onClose }) {
             Are you sure you want to delete it?
           </h4>
           <p className="text-sm text-gray-600 mt-4">
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed auctor auctor arcu, at fermentum dui. Maecenas
+            Do you really want to delete selected product
           </p>
           <div className="flex flex-col space-y-2 mt-4">
             <button
