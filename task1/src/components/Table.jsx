@@ -1,11 +1,15 @@
 import React, { useEffect, useState } from "react";
 import DelModal2 from "./DelModal2";
 import CreateModal from "./CreateModal";
+import UpdateModal from "./UpdateModal"; // Import UpdateModal component
 
 function Table() {
   const [products, setProducts] = useState([]);
-  const [showModal, setShowModal] = useState(false);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showUpdateModal, setShowUpdateModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false); // State for delete modal
   const [productId, setProductId] = useState(null);
+  const [selectedProduct, setSelectedProduct] = useState(null);
   const token = "test";
 
   useEffect(() => {
@@ -30,46 +34,61 @@ function Table() {
       await fetch(`https://ops.cloud.leadtorev.com/product-catalog/delete`, {
         method: "DELETE",
         headers: {
+          Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ id }),
       });
       setProducts(products.filter((product) => product._id !== id));
-      setShowModal(false);
+      setShowDeleteModal(false);
     } catch (error) {
       console.error("Error deleting product:", error);
     }
   };
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
-
-  const handleOpenModal = () => {
-    setIsModalOpen(true);
+  const handleOpenCreateModal = () => {
+    setShowCreateModal(true);
   };
 
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
+  const handleCloseCreateModal = () => {
+    setShowCreateModal(false);
+  };
+
+  const handleOpenUpdateModal = (product) => {
+    setSelectedProduct(product);
+    setShowUpdateModal(true);
+  };
+
+  const handleCloseUpdateModal = () => {
+    setShowUpdateModal(false);
+    setSelectedProduct(null);
+  };
+
+  const handleOpenDeleteModal = (id) => {
+    setProductId(id);
+    setShowDeleteModal(true);
+  };
+
+  const handleCloseDeleteModal = () => {
+    setShowDeleteModal(false);
   };
 
   return (
     <>
-    <div>
-    <div className="p-6">
-      <div className="w-100">
-        <button
-          onClick={handleOpenModal}
-          className="bg-blue-300 rounded-xl px-4 py-2 text-white"
-        >
-          Create Product
-        </button>
-      </div>
+      <div>
+        <div className="p-6">
+          <div className="w-100">
+            <button
+              onClick={handleOpenCreateModal}
+              className="bg-blue-300 rounded-xl px-4 py-2 text-white"
+            >
+              Create Product
+            </button>
+          </div>
 
-      {isModalOpen && (
-        <CreateModal onClose={handleCloseModal} />
-      )}
-    </div>
-    </div>
-          
+          {showCreateModal && <CreateModal onClose={handleCloseCreateModal} />}
+        </div>
+      </div>
 
       <div className="overflow-x-auto">
         <table className="table table-xs">
@@ -81,8 +100,8 @@ function Table() {
               <th>Availability</th>
               <th>Price</th>
               <th>Quantity</th>
-              <th>Edit Button</th>
-              <th>Delete Button</th>
+              <th>Edit</th>
+              <th>Delete</th>
             </tr>
           </thead>
           <tbody>
@@ -95,14 +114,17 @@ function Table() {
                 <td>{product.price}</td>
                 <td>{product.availability.quantity}</td>
                 <td>
-                  <button>Edit</button>
+                  <button
+                    onClick={() => handleOpenUpdateModal(product)}
+                    className="bg-yellow-300 rounded-xl px-2 py-1"
+                  >
+                    Edit
+                  </button>
                 </td>
                 <td>
                   <button
-                    onClick={() => {
-                      setProductId(product._id);
-                      setShowModal(true);
-                    }}
+                    onClick={() => handleOpenDeleteModal(product._id)}
+                    className="bg-red-300 rounded-xl px-2 py-1"
                   >
                     Delete
                   </button>
@@ -113,11 +135,18 @@ function Table() {
         </table>
       </div>
 
-      {showModal && (
+      {showDeleteModal && (
         <DelModal2
           productId={productId}
           onDelete={handleDelete}
-          onClose={() => setShowModal(false)}
+          onClose={handleCloseDeleteModal}
+        />
+      )}
+
+      {showUpdateModal && selectedProduct && (
+        <UpdateModal
+          product={selectedProduct}
+          onClose={handleCloseUpdateModal}
         />
       )}
     </>
